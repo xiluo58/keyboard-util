@@ -4,8 +4,9 @@
   "description": "Collect key press, generate heatmap",
   "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node $NODE_DEBUG_OPTION src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "heatmap": "node $NODE_DEBUG_OPTION dist/heatmap/heatmap.js",
+    "start": "node $NODE_DEBUG_OPTION dist/index.js"
   },
   "repository": {
     "type": "git",

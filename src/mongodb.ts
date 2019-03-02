@@ -1,5 +1,6 @@
 import { Collection, MongoClient } from "mongodb";
 
+let mongoClient: MongoClient;
 export default function connect(): Promise<Collection> {
   return new Promise((resolve, reject) => {
     console.log("connecting to mongodb");
@@ -9,6 +10,7 @@ export default function connect(): Promise<Collection> {
         if (err) {
           reject(err);
         } else {
+          mongoClient = client;
           console.log("connected to mongodb");
           const db = client.db("keyboard");
           const collection = db.collection("count");
@@ -19,4 +21,10 @@ export default function connect(): Promise<Collection> {
       }
     );
   });
+}
+
+export function closeDb(): void {
+  if (mongoClient) {
+    mongoClient.close();
+  }
 }

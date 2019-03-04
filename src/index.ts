@@ -1,26 +1,32 @@
-import * as hid from "node-hid";
 import connect from "./mongodb";
 import { Collection } from "mongodb";
+import { ChildProcess, spawn } from "child_process";
+import { join } from "path";
+import * as os from "os";
 
 let collection: Collection;
+let hidListen: ChildProcess;
 async function initialize() {
   collection = await connect();
-  const devices = hid
-    .devices()
-    .filter(device => device.manufacturer === "ErgoDox EZ");
-  const device = new hid.HID(devices[0].vendorId, devices[0].productId);
-  device.on("data", data => {
-    let message = data.toString("ascii");
-    const index = message.indexOf("\n");
-    message = message.substring(0, index);
-    handleData(message);
-  });
+  let executable;
+  switch (os.type()) {
+    case "Darwin": {
+      executable = join(__dirname, "../hid_listen.mac");
+    }
+  }
+  console.log(executable);
+  hidListen = spawn(executable);
+  hidListen.stdout.on("data", data => handleData(data.toString("ascii")));
 }
 
 function handleData(message: string) {
   const data = message.split(",");
   if (data.length === 4) {
     const [col, row, pressed, layer] = data.map(str => parseInt(str));
+    if (isNaN(col) || isNaN(row)) {
+      // don't why some time row or col is NaN. Whatever ignore this data
+      return;
+    }
     const event = { col, row, pressed, layer };
     if (pressed) {
       console.log(event);

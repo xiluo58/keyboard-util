@@ -5,8 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "heatmap": "node $NODE_DEBUG_OPTION dist/heatmap/heatmap.js",
-    "start": "node $NODE_DEBUG_OPTION dist/index.js"
+    "heatmap": "node dist/heatmap/heatmap.js",
+    "start": "node dist/index.js"
   },
   "repository": {
     "type": "git",

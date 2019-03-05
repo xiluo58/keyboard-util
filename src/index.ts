@@ -12,6 +12,15 @@ async function initialize() {
   switch (os.type()) {
     case "Darwin": {
       executable = join(__dirname, "../hid_listen.mac");
+      break;
+    }
+    case "Windows_NT": {
+      executable = join(__dirname, "../hid_listen.exe");
+      break;
+    }
+    default: {
+      console.log(`Unknown OS ${os.type}`);
+      process.exit();
     }
   }
   console.log(executable);

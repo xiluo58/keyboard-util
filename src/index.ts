@@ -1,31 +1,25 @@
 import connect from "./mongodb";
 import { Collection } from "mongodb";
-import { ChildProcess, spawn } from "child_process";
-import { join } from "path";
-import * as os from "os";
+import * as HID from "node-hid";
 
 let collection: Collection;
-let hidListen: ChildProcess;
+
 async function initialize() {
   collection = await connect();
-  let executable;
-  switch (os.type()) {
-    case "Darwin": {
-      executable = join(__dirname, "../hid_listen.mac");
+  const devices = HID.devices();
+  const keyboards = devices.filter(i => i.product.includes("ErgoDox"));
+  for (let i = 0; i < keyboards.length; i++) {
+    try {
+      const deviceInfo = keyboards[i];
+      const device = new HID.HID(deviceInfo.path);
+      device.on("data", data => {
+        const message = data.toString("ascii").split("\n")[0];
+        handleData(message);
+      });
+      console.log(deviceInfo);
       break;
-    }
-    case "Windows_NT": {
-      executable = join(__dirname, "../hid_listen.exe");
-      break;
-    }
-    default: {
-      console.log(`Unknown OS ${os.type}`);
-      process.exit();
-    }
+    } catch (ex) {}
   }
-  console.log(executable);
-  hidListen = spawn(executable);
-  hidListen.stdout.on("data", data => handleData(data.toString("ascii")));
 }
 
 function handleData(message: string) {
